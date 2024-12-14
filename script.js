@@ -46,3 +46,43 @@ dragableBox.addEventListener('wheel', (event) => {
   dragableBox.style.transform = `translate(${state.tX}px,${state.tY}px) scale(${state.scale})`
 })
 
+const altSvg = document.querySelector('#alt_svg')
+
+let altState = {
+  tX: 0,
+  tY: 0,
+
+}
+
+altSvg.addEventListener('pointerdown',(event) => {
+  event.preventDefault()
+  console.log('s')
+  altState.isDragging = true
+  altState.x = event.clientX
+  altState.y = event.clientY
+})
+
+altSvg.addEventListener('pointermove', (event) => {
+  event.preventDefault()
+  if (!altState.isDragging) {
+    return
+  }
+
+  if (!event.buttons) {
+    altState.isDragging = false
+    return
+  }
+
+  const {clientX,clientY} = event
+
+  const dX = clientX - altState.x
+  const dY = clientY - altState.y
+  altState.tX = altState.tX - dX
+  altState.tY = altState.tY - dY
+  const size = 1000
+
+  altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${altState.tX+size} ${altState.tY+size}`)
+
+  altState.x = clientX
+  altState.y = clientY
+})
