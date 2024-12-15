@@ -51,9 +51,12 @@ const altSvg = document.querySelector('#alt_svg')
 let altState = {
   tX: 0,
   tY: 0,
-
+  width: altSvg.clientWidth,
+  height: altSvg.clientHeight,
+  scale: 1,
 }
 
+console.log(altSvg)
 altSvg.addEventListener('pointerdown',(event) => {
   event.preventDefault()
   console.log('s')
@@ -75,14 +78,28 @@ altSvg.addEventListener('pointermove', (event) => {
 
   const {clientX,clientY} = event
 
+
   const dX = clientX - altState.x
   const dY = clientY - altState.y
-  altState.tX = altState.tX - dX
-  altState.tY = altState.tY - dY
-  const size = 1000
+  altState.tX = altState.tX - dX * altState.scale
+  altState.tY = altState.tY - dY * altState.scale
 
-  altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${altState.tX+size} ${altState.tY+size}`)
+  altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${altState.width*altState.scale} ${altState.height*altState.scale}`)
 
   altState.x = clientX
   altState.y = clientY
 })
+
+altSvg.addEventListener('wheel', (event) => {
+  event.preventDefault()
+  const oldScale = altState.scale
+
+  altState.scale += event.deltaY * 0.001
+  altState.scale = Math.min(Math.max(0.05,altState.scale))
+
+  altState.tX -= (altState.width * altState.scale - altState.width * oldScale ) / 2
+  altState.tY -= (altState.height * altState.scale - altState.height * oldScale ) / 2
+
+  altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${altState.width*altState.scale} ${altState.height*altState.scale}`)
+})
+
