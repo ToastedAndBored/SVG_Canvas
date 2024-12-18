@@ -57,7 +57,6 @@ let altState = {
 console.log(altSvg)
 altSvg.addEventListener('pointerdown',(event) => {
   event.preventDefault()
-  console.log('s')
   altState.isDragging = true
   altState.x = event.clientX
   altState.y = event.clientY
@@ -103,8 +102,9 @@ altSvg.addEventListener('wheel', (event) => {
 
   altState.tX -= (width * altState.scale - width * oldScale ) / 2
   altState.tY -= (height * altState.scale - height * oldScale ) / 2
-
   altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${width*altState.scale} ${height*altState.scale}`)
+
+  console.log(altState.scale)
 })
 
 
