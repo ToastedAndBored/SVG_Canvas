@@ -27,15 +27,15 @@
         </pattern>
         <pattern id="pgrid2" width="30" height="30" patternUnits="userSpaceOnUse">
           <rect width="30" height="30" fill="url(#pgrid1)"/>
-          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="lightblue" stroke-width="1"/>
+          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="yellow" stroke-width="1"/>
         </pattern>
         <pattern id="pgrid3" width="90" height="90" patternUnits="userSpaceOnUse">
           <rect width="90" height="90" fill="url(#pgrid2)"/>
-          <path d="M 90 0 L 0 0 0 90" fill="none" stroke="lightblue" stroke-width="2"/>
+          <path d="M 90 0 L 0 0 0 90" fill="none" stroke="red" stroke-width="2"/>
         </pattern>
       </defs>
 
-      <rect width="2000" height="2000" fill="url(#pgrid3)" style = "transform: scale(1);" />
+      <rect id = "grid" x = "-180000" y = "-180000" width="720000" height="720000" fill="url(#pgrid3)" style = "transform: scale(1);" />
       <circle cx="0" cy="0" r="20"/>
     </svg>
     <script src='script.js'></script>

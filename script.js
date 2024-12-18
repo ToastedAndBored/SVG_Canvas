@@ -90,6 +90,8 @@ altSvg.addEventListener('pointermove', (event) => {
   altState.y = clientY
 })
 
+const grid = document.querySelector("#grid")
+
 altSvg.addEventListener('wheel', (event) => {
   event.preventDefault()
   const oldScale = altState.scale
@@ -103,8 +105,18 @@ altSvg.addEventListener('wheel', (event) => {
   altState.tX -= (width * altState.scale - width * oldScale ) / 2
   altState.tY -= (height * altState.scale - height * oldScale ) / 2
   altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${width*altState.scale} ${height*altState.scale}`)
-
   console.log(altState.scale)
+  grid.style.transform = `scale(${Math.max(1, Math.floor(altState.scale/3)*3)})`
+  // if(oldScale < 9 && altState.scale >= 9) {
+  //   grid.style.transform = `scale(9)`
+  // }else if(oldScale >= 9 && altState.scale < 9) {
+  //   grid.style.transform = `scale(3)`
+  // }else if (oldScale < 3 && altState.scale >= 3) {
+  //  grid.style.transform = `scale(3)`
+
+  // }else if(oldscale >= 3 && altstate.scale < 3) {
+  //   grid.style.transform = `scale(1)`
+  // }
 })
 
 
