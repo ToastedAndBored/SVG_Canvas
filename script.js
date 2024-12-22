@@ -46,78 +46,131 @@ dragableBox.addEventListener('wheel', (event) => {
   dragableBox.style.transform = `translate(${state.tX}px,${state.tY}px) scale(${state.scale})`
 })
 
-const altSvg = document.querySelector('#alt_svg')
 
-let altState = {
-  tX: 0,
-  tY: 0,
-  scale: 1,
+function setAttributes(el, attrs) {
+  for(var key in attrs) {
+    el.setAttribute(key, attrs[key]);
+  }
 }
 
-console.log(altSvg)
-altSvg.addEventListener('pointerdown',(event) => {
-  event.preventDefault()
-  altState.isDragging = true
-  altState.x = event.clientX
-  altState.y = event.clientY
-})
+// TODO: Write better random generation function with variable length
+function randStr (prefix="") {
+  if (""+prefix != "") { prefix = prefix+"_" }
+  return prefix+Math.random().toString(16).slice(2);
+}
 
-altSvg.addEventListener('pointermove', (event) => {
-  event.preventDefault()
-  if (!altState.isDragging) {
-    return
+function randID(prefix="", doc=document) {
+  while (true) {
+    rid = randStr(prefix)
+    if (doc.getElementById(rid)) {continue}
+    return rid
   }
+}
 
-  if (!event.buttons) {
-    altState.isDragging = false
-    return
-  }
+function addGridToSVG(svg) {
+  const defs = svg.children[0]
+  const pat1 = randID(svg.id+"_pat1")
+  const pat2 = randID(svg.id+"_pat1")
+  const pat3 = randID(svg.id+"_pat1")
+  defs.insertAdjacentHTML("afterbegin", `
+    <pattern id="${pat1}" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M 10 0 L 0 0 0 10" fill="none" stroke="lightblue" stroke-width="0.5"/>
+    </pattern>
+    <pattern id="${pat2}" width="30" height="30" patternUnits="userSpaceOnUse">
+      <rect width="30" height="30" fill="url(#${pat1})"/>
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="yellow" stroke-width="1"/>
+    </pattern>
+    <pattern id="${pat3}" width="90" height="90" patternUnits="userSpaceOnUse">
+      <rect width="90" height="90" fill="url(#${pat2})"/>
+      <path d="M 90 0 L 0 0 0 90" fill="none" stroke="red" stroke-width="2"/>
+    </pattern>
+  `)
+  const grid = document.createElementNS('http://www.w3.org/2000/svg',"rect")
+  svg.appendChild(grid)
+  setAttributes(grid, {
+    x: "-180000",
+    y: "-180000",
+    width: "720000",
+    height: "720000",
+    fill: `url(#${pat3})`,
+    style: "transform: scale(1);",
+  })
+  return grid
+}
 
-  const {clientX,clientY} = event
+function Canvas(selector, log=()=>{}){
+  const svg = document.querySelector(selector)
 
+  log(svg)
 
-  const width = altSvg.clientWidth
-  const height = altSvg.clientHeight
+  let tX = 0
+  let tY = 0 //svg viewBox x y
+  let scale = 1
+  let isDragging = false
+  let pX = 0 //pointer x
+  let pY = 0 //pointer y
 
-  const dX = clientX - altState.x
-  const dY = clientY - altState.y
-  altState.tX = altState.tX - dX * altState.scale
-  altState.tY = altState.tY - dY * altState.scale
+  svg.addEventListener('pointerdown',(event) => {
+    event.preventDefault()
+    isDragging = true
+    pX = event.clientX
+    pY = event.clientY
+  })
 
-  altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${width*altState.scale} ${height*altState.scale}`)
+  svg.addEventListener('pointermove', (event) => {
+    event.preventDefault()
+    if (!isDragging) {
+      return
+    }
 
-  altState.x = clientX
-  altState.y = clientY
-})
+    if (!event.buttons) {
+      isDragging = false
+      return
+    }
 
-const grid = document.querySelector("#grid")
+    const {clientX,clientY} = event
 
-altSvg.addEventListener('wheel', (event) => {
-  event.preventDefault()
-  const oldScale = altState.scale
+    const width = svg.clientWidth
+    const height = svg.clientHeight
 
-  altState.scale += event.deltaY * 0.001
-  altState.scale = Math.min(Math.max(0.05,altState.scale))
+    const dX = clientX - pX
+    const dY = clientY - pY
+    tX = tX - dX * scale
+    tY = tY - dY * scale
 
-  const width = altSvg.clientWidth
-  const height = altSvg.clientHeight
+    svg.setAttribute("viewBox", `${tX} ${tY} ${width*scale} ${height*scale}`)
 
-  altState.tX -= (width * altState.scale - width * oldScale ) / 2
-  altState.tY -= (height * altState.scale - height * oldScale ) / 2
-  altSvg.setAttribute("viewBox", `${altState.tX} ${altState.tY} ${width*altState.scale} ${height*altState.scale}`)
-  console.log(altState.scale)
-  grid.style.transform = `scale(${Math.max(1, Math.floor(altState.scale/3)*3)})`
-  // if(oldScale < 9 && altState.scale >= 9) {
-  //   grid.style.transform = `scale(9)`
-  // }else if(oldScale >= 9 && altState.scale < 9) {
-  //   grid.style.transform = `scale(3)`
-  // }else if (oldScale < 3 && altState.scale >= 3) {
-  //  grid.style.transform = `scale(3)`
+    pX = clientX
+    pY = clientY
+  })
 
-  // }else if(oldscale >= 3 && altstate.scale < 3) {
-  //   grid.style.transform = `scale(1)`
-  // }
-})
+  const grid = addGridToSVG(svg)
 
+  let lastGridScale = 0
 
+  const powersOf3 = [1,3,9,27,81]
+
+  svg.addEventListener('wheel', (event) => {
+    event.preventDefault()
+    const oldScale = scale
+
+    scale += event.deltaY * 0.001
+    scale = Math.min(Math.max(0.05,scale))
+
+    const width = svg.clientWidth
+    const height = svg.clientHeight
+
+    tX -= (width * scale - width * oldScale ) / 2
+    tY -= (height * scale - height * oldScale ) / 2
+    svg.setAttribute("viewBox", `${tX} ${tY} ${width*scale} ${height*scale}`)
+    const gridScale = Math.max(1,Math.floor(scale))
+    if ((powersOf3.includes(gridScale)) && (lastGridScale != gridScale)){
+      lastGridScale = gridScale
+      grid.style.transform = `scale(${gridScale})`
+    }
+    })
+
+}
+
+const canvas = new Canvas("#alt_svg", console.log)
 
