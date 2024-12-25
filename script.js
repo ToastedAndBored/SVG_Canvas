@@ -1,3 +1,4 @@
+const powersOf3 = [1,3,9,27,81]
 const dragableBox = document.querySelector('.dragable_box')
 
 let state = {
@@ -61,7 +62,7 @@ function randStr (prefix="") {
 
 function randID(prefix="", doc=document) {
   while (true) {
-    rid = randStr(prefix)
+    let rid = randStr(prefix)
     if (doc.getElementById(rid)) {continue}
     return rid
   }
@@ -110,6 +111,28 @@ function Canvas(selector, log=()=>{}){
   let pX = 0 //pointer x
   let pY = 0 //pointer y
 
+  const grid = addGridToSVG(svg)
+
+  let lastGridScale = 0
+
+  this.set_position = (x,y,s) => {
+    // TODO: do nothing if x,y,s already equals to tX,tY,scale
+    const width = svg.clientWidth * s
+    const height = svg.clientHeight * s
+
+    svg.setAttribute("viewBox", `${x-(width/2)} ${y-(height/2)} ${width} ${height}`)
+
+    tX = x
+    tY = y
+    scale = s
+
+    const gridScale = Math.max(1,Math.floor(scale))
+    if ((powersOf3.includes(gridScale)) && (lastGridScale != gridScale)){
+      lastGridScale = gridScale
+      grid.style.transform = `scale(${gridScale})`
+    }
+  }
+
   svg.addEventListener('pointerdown',(event) => {
     event.preventDefault()
     isDragging = true
@@ -130,25 +153,14 @@ function Canvas(selector, log=()=>{}){
 
     const {clientX,clientY} = event
 
-    const width = svg.clientWidth
-    const height = svg.clientHeight
+    const nX = tX - (clientX - pX)*scale
+    const nY = tY - (clientY - pY)*scale
 
-    const dX = clientX - pX
-    const dY = clientY - pY
-    tX = tX - dX * scale
-    tY = tY - dY * scale
-
-    svg.setAttribute("viewBox", `${tX} ${tY} ${width*scale} ${height*scale}`)
+    this.set_position(nX,nY,scale)
 
     pX = clientX
     pY = clientY
   })
-
-  const grid = addGridToSVG(svg)
-
-  let lastGridScale = 0
-
-  const powersOf3 = [1,3,9,27,81]
 
   svg.addEventListener('wheel', (event) => {
     event.preventDefault()
@@ -157,20 +169,9 @@ function Canvas(selector, log=()=>{}){
     scale += event.deltaY * 0.001
     scale = Math.min(Math.max(0.05,scale))
 
-    const width = svg.clientWidth
-    const height = svg.clientHeight
-
-    tX -= (width * scale - width * oldScale ) / 2
-    tY -= (height * scale - height * oldScale ) / 2
-    svg.setAttribute("viewBox", `${tX} ${tY} ${width*scale} ${height*scale}`)
-    const gridScale = Math.max(1,Math.floor(scale))
-    if ((powersOf3.includes(gridScale)) && (lastGridScale != gridScale)){
-      lastGridScale = gridScale
-      grid.style.transform = `scale(${gridScale})`
-    }
-    })
-
+    this.set_position(tX,tY,scale)
+  })
 }
 
 const canvas = new Canvas("#alt_svg", console.log)
-
+canvas.set_position(0,0,1)
