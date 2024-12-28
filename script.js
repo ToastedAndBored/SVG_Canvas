@@ -100,8 +100,10 @@ function addGridToSVG(svg) {
 }
 
 function Canvas(selector, log=()=>{}){
-  const svg = document.querySelector(selector)
-
+  const root = document.querySelector(selector)
+  const svg = root.children[0]
+  const widgets = root.children[1]
+  log(widgets)
   log(svg)
 
   let tX = 0
@@ -117,10 +119,10 @@ function Canvas(selector, log=()=>{}){
 
   this.set_position = (x,y,s) => {
     // TODO: do nothing if x,y,s already equals to tX,tY,scale
-    const width = svg.clientWidth * s
-    const height = svg.clientHeight * s
+    const width = svg.clientWidth
+    const height = svg.clientHeight
 
-    svg.setAttribute("viewBox", `${x-(width/2)} ${y-(height/2)} ${width} ${height}`)
+    svg.setAttribute("viewBox", `${x-(width/2*s)} ${y-(height/2*s)} ${width*s} ${height*s}`)
 
     tX = x
     tY = y
@@ -131,6 +133,8 @@ function Canvas(selector, log=()=>{}){
       lastGridScale = gridScale
       grid.style.transform = `scale(${gridScale})`
     }
+
+    widgets.style.transform = `translate(${(width/2)-x/s}px,${(height/2)-y/s}px) scale(${1/s})`
   }
 
   svg.addEventListener('pointerdown',(event) => {
@@ -140,8 +144,9 @@ function Canvas(selector, log=()=>{}){
     pY = event.clientY
   })
 
-  svg.addEventListener('pointermove', (event) => {
+  const onPointerMove = (event) => {
     event.preventDefault()
+
     if (!isDragging) {
       return
     }
@@ -160,9 +165,12 @@ function Canvas(selector, log=()=>{}){
 
     pX = clientX
     pY = clientY
-  })
+  }
 
-  svg.addEventListener('wheel', (event) => {
+  svg.addEventListener('pointermove', onPointerMove)
+  widgets.addEventListener('pointermove', onPointerMove)
+
+  const onWheel = (event) => {
     event.preventDefault()
     const oldScale = scale
 
@@ -170,8 +178,13 @@ function Canvas(selector, log=()=>{}){
     scale = Math.min(Math.max(0.05,scale))
 
     this.set_position(tX,tY,scale)
-  })
+  }
+
+  svg.addEventListener('wheel', onWheel)
+  widgets.addEventListener('wheel', onWheel)
+
 }
 
-const canvas = new Canvas("#alt_svg", console.log)
+const canvas = new Canvas(".canvas", console.log)
 canvas.set_position(0,0,1)
+
