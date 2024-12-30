@@ -1,52 +1,4 @@
 const powersOf3 = [1,3,9,27,81]
-const dragableBox = document.querySelector('.dragable_box')
-
-let state = {
-  tX: 0,
-  tY: 0,
-  scale: 1,
-
-}
-dragableBox.addEventListener('pointerdown',(event) => {
-  event.preventDefault()
-  state.isDragging = true
-  state.x = event.clientX
-  state.y = event.clientY
-})
-
-dragableBox.addEventListener('pointermove', (event) => {
-  event.preventDefault()
-  if (!state.isDragging) {
-    return
-  }
-
-  if (!event.buttons) {
-    state.isDragging = false
-    return
-  }
-
-  const {clientX,clientY} = event
-
-  const dX = clientX - state.x
-  const dY = clientY - state.y
-  state.tX = state.tX + dX
-  state.tY = state.tY + dY
-
-  dragableBox.style.transform = `translate(${state.tX}px,${state.tY}px) scale(${state.scale})`
-
-  state.x = clientX
-  state.y = clientY
-})
-
-dragableBox.addEventListener('wheel', (event) => {
-  event.preventDefault()
-
-  state.scale += event.deltaY * 0.001
-  state.scale = Math.min(Math.max(0.1,state.scale))
-
-  dragableBox.style.transform = `translate(${state.tX}px,${state.tY}px) scale(${state.scale})`
-})
-
 
 function setAttributes(el, attrs) {
   for(var key in attrs) {
@@ -75,15 +27,15 @@ function addGridToSVG(svg) {
   const pat3 = randID(svg.id+"_pat1")
   defs.insertAdjacentHTML("afterbegin", `
     <pattern id="${pat1}" width="10" height="10" patternUnits="userSpaceOnUse">
-      <path d="M 10 0 L 0 0 0 10" fill="none" stroke="lightblue" stroke-width="0.5"/>
+      <path d="M 10 0 L 0 0 0 10" fill="none" stroke-width="0.5"/>
     </pattern>
     <pattern id="${pat2}" width="30" height="30" patternUnits="userSpaceOnUse">
       <rect width="30" height="30" fill="url(#${pat1})"/>
-      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="yellow" stroke-width="1"/>
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke-width="1"/>
     </pattern>
     <pattern id="${pat3}" width="90" height="90" patternUnits="userSpaceOnUse">
       <rect width="90" height="90" fill="url(#${pat2})"/>
-      <path d="M 90 0 L 0 0 0 90" fill="none" stroke="red" stroke-width="2"/>
+      <path d="M 90 0 L 0 0 0 90" fill="none" stroke-width="2"/>
     </pattern>
   `)
   const grid = document.createElementNS('http://www.w3.org/2000/svg',"rect")
@@ -103,8 +55,8 @@ function Canvas(selector, log=()=>{}){
   const root = document.querySelector(selector)
   const svg = root.children[0]
   const widgets = root.children[1]
-  log(widgets)
-  log(svg)
+  log("Canvas widgets node: ", widgets)
+  log("Canvas SVG node: ",svg)
 
   let tX = 0
   let tY = 0 //svg viewBox x y
@@ -185,6 +137,6 @@ function Canvas(selector, log=()=>{}){
 
 }
 
-const canvas = new Canvas(".canvas", console.log)
+const canvas = new Canvas("#canvas")
 canvas.set_position(0,0,1)
 

@@ -7,27 +7,13 @@
     <link href="styles.css" rel="stylesheet">
   </head>
   <body>
-    <div class = "box">
-      <div class = "dragable_box" id = "dragable_box">
-        <svg class = "svg">
-          <defs>
-            <pattern id="star" viewBox="0,0,10,10" width="10%" height="10%">
-              <polygon points="0,0 2,5 0,10 5,8 10,10 8,5 10,0 5,2" />
-            </pattern>
-          </defs>
-
-          <circle cx="25" cy="75" r="50" stroke = "url(#star)" fill = "none" stroke-width="20"/>
-        </svg>
-      </div>
-    </div>
-    <div class = "canvas" style = "position: relative; overflow: hidden;">
-      <svg class = "svg" id = "alt_svg" style = "background-color: blue;">
-        <defs>
-        </defs>
+    <div id = "canvas" style = "position: relative; overflow: hidden; width: 100%; height: 600px;">
+      <svg style = "width: 100%; height: 100%;">
+        <defs/>
+        <!-- Example circle -->
         <circle cx="0" cy="0" r="20"/>
       </svg>
-      <div style = "width: 0px; height: 0px; background-color: black;
-        position: absolute; top: 0px; left: 0px; overflow: visible;">
+      <div style = "width: 0px; height: 0px; position: absolute; top: 0px; left: 0px; overflow: visible;">
         <button type="button" style = "width: 50px; height: 50px;
         position: absolute; top:30px; left: 30px;"></button>
       </div>
