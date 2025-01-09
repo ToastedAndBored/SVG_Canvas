@@ -51,89 +51,102 @@ function addGridToSVG(svg) {
   return grid
 }
 
-function Canvas(selector, log=()=>{}){
-  const root = document.querySelector(selector)
-  const svg = root.children[0]
-  const widgets = root.children[1]
-  log("Canvas widgets node: ", widgets)
-  log("Canvas SVG node: ",svg)
+class Canvas {
+  #root
+  #svg
+  #widgets
+  #tX
+  #tY
+  #scale
+  #isDragging
+  #pX
+  #pY
+  #grid
+  #lastGridScale
+  constructor(selector){
+    this.#root = document.querySelector(selector)
+    this.#svg = this.#root.children[0]
+    this.#widgets = this.#root.children[1]
+    // log("Canvas widgets node: ", widgets)
+    // log("Canvas SVG node: ",svg)
 
-  let tX = 0
-  let tY = 0 //svg viewBox x y
-  let scale = 1
-  let isDragging = false
-  let pX = 0 //pointer x
-  let pY = 0 //pointer y
+    this.#tX = 0
+    this.#tY = 0 //svg viewBox x y
+    this.#scale = 1
+    this.#isDragging = false
+    this.#pX = 0 //pointer x
+    this.#pY = 0 //pointer y
 
-  const grid = addGridToSVG(svg)
+    this.#grid = addGridToSVG(this.#svg)
 
-  let lastGridScale = 0
+    this.#lastGridScale = 0
 
-  this.set_position = (x,y,s) => {
-    // TODO: do nothing if x,y,s already equals to tX,tY,scale
-    const width = svg.clientWidth
-    const height = svg.clientHeight
+    this.#svg.addEventListener('pointerdown',(event) => {
+      event.preventDefault()
+      this.#isDragging = true
+      this.#pX = event.clientX
+      this.#pY = event.clientY
+    })
 
-    svg.setAttribute("viewBox", `${x-(width/2*s)} ${y-(height/2*s)} ${width*s} ${height*s}`)
+    this.#svg.addEventListener('pointermove', (e) => {this.#onPointerMove(e)})
+    this.#widgets.addEventListener('pointermove', (e) => {this.#onPointerMove(e)})
 
-    tX = x
-    tY = y
-    scale = s
-
-    const gridScale = Math.max(1,Math.floor(scale))
-    if ((powersOf3.includes(gridScale)) && (lastGridScale != gridScale)){
-      lastGridScale = gridScale
-      grid.style.transform = `scale(${gridScale})`
-    }
-
-    widgets.style.transform = `translate(${(width/2)-x/s}px,${(height/2)-y/s}px) scale(${1/s})`
+    this.#svg.addEventListener('wheel', (e) => {this.#onWheel(e)})
+    this.#widgets.addEventListener('wheel', (e) => {this.#onWheel(e)})
   }
 
-  svg.addEventListener('pointerdown',(event) => {
-    event.preventDefault()
-    isDragging = true
-    pX = event.clientX
-    pY = event.clientY
-  })
+  set_position(x,y,s){
+    // TODO: do nothing if x,y,s already equals to tX,tY,scale
+    const width = this.#svg.clientWidth
+    const height = this.#svg.clientHeight
 
-  const onPointerMove = (event) => {
+    this.#svg.setAttribute("viewBox", `${x-(width/2*s)} ${y-(height/2*s)} ${width*s} ${height*s}`)
+
+    this.#tX = x
+    this.#tY = y
+    this.#scale = s
+
+    const gridScale = Math.max(1,Math.floor(this.#scale))
+    if ((powersOf3.includes(gridScale)) && (this.#lastGridScale != gridScale)){
+      this.#lastGridScale = gridScale
+      this.#grid.style.transform = `scale(${gridScale})`
+    }
+
+    this.#widgets.style.transform = `translate(${(width/2)-x/s}px,${(height/2)-y/s}px) scale(${1/s})`
+  }
+
+  #onPointerMove(event){
     event.preventDefault()
 
-    if (!isDragging) {
+    if (!this.#isDragging) {
       return
     }
 
     if (!event.buttons) {
-      isDragging = false
+      this.#isDragging = false
       return
     }
 
     const {clientX,clientY} = event
 
-    const nX = tX - (clientX - pX)*scale
-    const nY = tY - (clientY - pY)*scale
+    const nX = this.#tX - (clientX - this.#pX)*this.#scale
+    const nY = this.#tY - (clientY - this.#pY)*this.#scale
 
-    this.set_position(nX,nY,scale)
+    this.set_position(nX,nY,this.#scale)
 
-    pX = clientX
-    pY = clientY
+    this.#pX = clientX
+    this.#pY = clientY
   }
 
-  svg.addEventListener('pointermove', onPointerMove)
-  widgets.addEventListener('pointermove', onPointerMove)
-
-  const onWheel = (event) => {
+  #onWheel(event){
     event.preventDefault()
-    const oldScale = scale
+    const oldScale = this.#scale
 
-    scale += event.deltaY * 0.001
-    scale = Math.min(Math.max(0.05,scale))
+    this.#scale += event.deltaY * 0.001
+    this.#scale = Math.min(Math.max(0.05,this.#scale))
 
-    this.set_position(tX,tY,scale)
+    this.set_position(this.#tX,this.#tY,this.#scale)
   }
-
-  svg.addEventListener('wheel', onWheel)
-  widgets.addEventListener('wheel', onWheel)
 
 }
 
