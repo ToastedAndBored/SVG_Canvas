@@ -3,11 +3,15 @@ body {
   margin: 0px;
 }
 
-#canvas svg {
+w-board {
+  display: block;
+}
+
+w-board svg {
   background-color: #555555;
 
 }
 
-#canvas svg defs pattern {
+w-board svg defs pattern {
   stroke: #A0A0A0;
 }

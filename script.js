@@ -51,8 +51,7 @@ function addGridToSVG(svg) {
   return grid
 }
 
-class Canvas {
-  #root
+class WhiteBoard extends HTMLElement {
   #svg
   #widgets
   #tX
@@ -63,12 +62,25 @@ class Canvas {
   #pY
   #grid
   #lastGridScale
-  constructor(selector){
-    this.#root = document.querySelector(selector)
-    this.#svg = this.#root.children[0]
-    this.#widgets = this.#root.children[1]
+
+  constructor () {
+    super()
+  }
+
+  connectedCallback() {
+    if (document.readyState === 'complete') {
+      this.#init()
+    }else{
+      document.addEventListener("DOMContentLoaded", (e) => { this.#init() });
+    }
+  }
+
+  #init() {
+    // console.log(this)
+    this.#svg = this.children[0]
+    this.#widgets = this.children[1]
     // log("Canvas widgets node: ", widgets)
-    // log("Canvas SVG node: ",svg)
+    // console.log("Canvas SVG node: ",this.children)
 
     this.#tX = 0
     this.#tY = 0 //svg viewBox x y
@@ -115,6 +127,8 @@ class Canvas {
     this.#widgets.style.transform = `translate(${(width/2)-x/s}px,${(height/2)-y/s}px) scale(${1/s})`
   }
 
+  // BUG: Widgests plane dont adapt when component size change
+
   #onPointerMove(event){
     event.preventDefault()
 
@@ -147,9 +161,10 @@ class Canvas {
 
     this.set_position(this.#tX,this.#tY,this.#scale)
   }
-
 }
 
-const canvas = new Canvas("#canvas")
-canvas.set_position(0,0,1)
+
+customElements.define("w-board", WhiteBoard);
+// const canvas = new Canvas("#canvas")
+// canvas.set_position(0,0,1)
 
